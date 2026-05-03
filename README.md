@@ -1,29 +1,75 @@
 # Snapmaker U1 Card for Home Assistant
 
-[![hacs_badge](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/hacs/integration)
+[![Version](https://img.shields.io/badge/version-0.0.50-blue.svg)](CHANGELOG.md)
+[![HACS](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/hacs/integration)
+[![HA](https://img.shields.io/badge/Home%20Assistant-2023.1%2B-brightgreen.svg)](https://www.home-assistant.io/)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
-A prismatic-styled Home Assistant Lovelace card for the **Snapmaker U1 3D printer**, pulling live data from the [Moonraker](https://moonraker.readthedocs.io/) REST API (Klipper-based firmware).
+A **Prism Dashboard**-style Home Assistant Lovelace card for the **Snapmaker U1 3D printer**, pulling live data from the [Moonraker](https://moonraker.readthedocs.io/) REST API (Klipper / AFC Lite v2.x firmware).
+
+<p align="center">
+  <img src="docs/images/snapmaker-u1.png" alt="Snapmaker U1" width="340" />
+</p>
 
 ---
 
-## Preview
+## Status Variants
 
-> Four automatic state variants — Printing (cyan), Standby (purple), Error (red), Paused (amber) — each with animated prismatic border, side stat columns, center printer image, G-code thumbnail, MMU filament strip, and action buttons.
+The card automatically switches appearance based on printer state.
+
+| State | Accent | Description |
+|---|---|---|
+| 🖨️ **Printing** | Cyan `#00e5ff` | Active print — progress bar, layer, speed, thumbnail |
+| 💤 **Standby** | Purple `#a78bfa` | Printer ready, idle |
+| ⏸️ **Paused** | Amber `#f59e0b` | Print paused — Resume / Cancel actions highlighted |
+| ❌ **Error / Offline** | Red `#ff4f4f` | Moonraker unreachable or firmware error |
+
+### Printing
+
+<p align="center">
+  <img src="docs/images/state-printing.jpg" alt="Printing state — cyan accent, progress bar, layer, speed, G-code thumbnail, AFC active lane glow" width="420" />
+</p>
+
+### Standby
+
+<p align="center">
+  <img src="docs/images/state-standby.jpg" alt="Standby state — purple accent, idle overlay, last print summary, Start Print and Preheat buttons" width="420" />
+</p>
+
+### Paused
+
+<p align="center">
+  <img src="docs/images/state-paused.jpg" alt="Paused state — amber accent, temperatures held, Resume / Cancel / E-Stop actions" width="420" />
+</p>
+
+### Error / Offline
+
+<p align="center">
+  <img src="docs/images/state-error.jpg" alt="Error state — red accent, fault code, halted progress bar, Clear Error action" width="420" />
+</p>
+
+### Live AFC Filament Panel
+
+The card embeds a 4-lane AFC filament strip. The active lane glows with its spool color; idle lanes are dimmed.
+
+<p align="center">
+  <img src="docs/images/afc-panel.png" alt="AFC Filament Panel" width="700" />
+</p>
 
 ---
 
 ## Features
 
-- Live polling of Moonraker every 2 seconds (configurable)
-- Automatic state switching: **Printing → Paused → Error → Standby**
-- Animated prismatic border (color-coded per state)
-- Nozzle & bed temperatures with mini progress bars
-- Layer count, print speed, fan speed, filament used
-- Progress bar with elapsed & remaining time estimates
-- G-code cover thumbnail (auto-fetched from Moonraker metadata)
-- 4-slot MMU filament strip with active-slot glow
-- Action buttons: Pause, Resume, Cancel, Emergency Stop, Preheat
-- Single vanilla JS file — no build step, no dependencies
+- **Live Moonraker polling** every 2 seconds (configurable)
+- **Four auto-switching state variants** — Printing · Standby · Paused · Error
+- **Animated prismatic border** — color-coded per state with glow
+- **Nozzle & bed temperatures** with mini progress bars
+- **Layer count, print speed, fan speed, filament used**
+- **Progress bar** with elapsed & remaining time estimates
+- **G-code thumbnail** — auto-fetched from Moonraker file metadata
+- **4-slot AFC Lite filament strip** — active lane glow, spool color, material, weight
+- **Action buttons** — Pause, Resume, Cancel, Emergency Stop, Preheat
+- **Single vanilla JS file** — no build step, zero dependencies
 
 ---
 
@@ -31,15 +77,15 @@ A prismatic-styled Home Assistant Lovelace card for the **Snapmaker U1 3D printe
 
 ### Via HACS (recommended)
 
-1. Open HACS → Frontend → **⋮** → Custom repositories
+1. Open **HACS → Frontend → ⋮ → Custom repositories**
 2. Add this repository URL, category: **Lovelace**
 3. Click **Install**
 4. Hard-refresh your browser (`Ctrl+Shift+R`)
 
 ### Manual
 
-1. Copy `snapmaker-u1-card.js` to `<ha-config>/www/snapmaker-u1-card.js`
-2. Go to Settings → Dashboards → **⋮** → Resources → Add:
+1. Copy `snapmaker-u1-card.js` to `<config>/www/snapmaker-u1-card.js`
+2. Go to **Settings → Dashboards → ⋮ → Resources → Add resource**
    - URL: `/local/snapmaker-u1-card.js`
    - Type: `JavaScript Module`
 3. Hard-refresh your browser
@@ -48,30 +94,32 @@ A prismatic-styled Home Assistant Lovelace card for the **Snapmaker U1 3D printe
 
 ## Configuration
 
-Add this to any Lovelace dashboard (raw YAML editor):
-
 ```yaml
 type: custom:snapmaker-u1-card
-moonraker_url: http://192.168.1.xxx    # required — your printer's IP/hostname
-printer_image: /local/snapmaker-u1.png # optional — image shown in card center
-poll_interval: 2000                    # optional — polling interval in ms (default 2000)
-# api_key: your-moonraker-api-key      # optional — only needed if Moonraker requires auth
-mmu_slots:                             # optional — customize filament slots
-  - { type: PLA,  color: "#ef4444" }
-  - { type: PETG, color: "#f1f5f9" }
-  - { type: PLA,  color: "#1c1917" }
-  - { type: TPU,  color: "#facc15" }
+moonraker_url: http://192.168.1.xxx    # required — Moonraker IP/hostname (no trailing slash)
+printer_image: /local/snapmaker-u1.png # optional — image shown in card centre
+poll_interval: 2000                    # optional — polling ms (default 2000)
+# api_key: your-moonraker-api-key      # optional — only if Moonraker requires auth
 ```
 
-### Configuration options
+### Options
 
 | Option | Required | Default | Description |
 |---|---|---|---|
-| `moonraker_url` | Yes | — | Base URL of your Moonraker instance (no trailing slash) |
-| `printer_image` | No | *(none)* | URL or HA local path to a printer image |
-| `poll_interval` | No | `2000` | How often to poll Moonraker, in milliseconds |
-| `api_key` | No | *(none)* | Moonraker API key — omit if not using key-based auth |
-| `mmu_slots` | No | 4 default slots | Array of `{ type, color }` objects for the MMU strip |
+| `moonraker_url` | **Yes** | — | Base URL of your Moonraker instance |
+| `printer_image` | No | *(none)* | URL or HA `/local/` path for the centre printer image |
+| `poll_interval` | No | `2000` | Polling interval in milliseconds |
+| `api_key` | No | *(none)* | Moonraker API key (omit if not required) |
+
+### Printer image
+
+Copy the included `docs/images/snapmaker-u1.png` to your HA config:
+
+```
+<config>/www/snapmaker-u1.png
+```
+
+Then reference it in the card config as `/local/snapmaker-u1.png`.
 
 ### Finding your Moonraker API key
 
@@ -85,24 +133,56 @@ Then add `api_key: <the-key>` to your card config.
 
 ---
 
-## Moonraker setup
+## AFC Lite v2.x — Filament Slots
 
-This card queries the following Moonraker endpoints:
+The card reads AFC data directly from Moonraker via the `AFC_lane` query object. No extra sensor setup is needed. The slot strip shows:
+
+- **Spool color swatch** — matches the color set in your AFC config
+- **Material type** — e.g. PLA, PETG, ABS
+- **Weight** — in grams
+- **Active glow** — the currently loaded lane highlights with its spool color
+
+> AFC data updates on every poll cycle (default every 2 s).
+
+---
+
+## Moonraker Endpoints Used
 
 | Endpoint | Purpose |
 |---|---|
-| `/printer/objects/query` | Live printer state, temperatures, progress |
-| `/server/files/metadata` | G-code thumbnail lookup |
-| `/printer/print/pause` | Pause button |
-| `/printer/print/resume` | Resume button |
-| `/printer/print/cancel` | Cancel button |
-| `/printer/emergency_stop` | E-Stop button |
-| `/printer/gcode/script` | Preheat (sends `M104 S200` + `M140 S60`) |
+| `GET /printer/objects/query` | Live state, temps, progress, AFC data |
+| `GET /server/files/metadata` | G-code thumbnail lookup |
+| `POST /printer/print/pause` | Pause action |
+| `POST /printer/print/resume` | Resume action |
+| `POST /printer/print/cancel` | Cancel action |
+| `POST /printer/emergency_stop` | Emergency stop |
+| `POST /printer/gcode/script` | Preheat (`M104 S200` + `M140 S60`) |
 
-Your Moonraker instance must be reachable from the browser running your HA dashboard (not just the HA server). For remote access, expose Moonraker through a reverse proxy or VPN.
+> Moonraker must be reachable from the **browser** serving your dashboard — not just the HA server. For remote access, use a reverse proxy or VPN.
+
+---
+
+## CORS / Network Notes
+
+If your HA and Moonraker are on different origins, add your HA origin to `moonraker.conf`:
+
+```ini
+[authorization]
+cors_domains:
+  http://your-ha-ip:8123
+  https://your-ha-domain.duckdns.org
+```
+
+---
+
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) for the full version history.
+
+**Current version:** `0.0.50` (internal build `v24.0.0`)
 
 ---
 
 ## License
 
-MIT
+MIT — see [LICENSE](LICENSE) for details.
