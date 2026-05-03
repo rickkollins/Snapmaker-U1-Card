@@ -1,0 +1,7 @@
+{
+  "name": "Snapmaker U1 Card",
+  "render_readme": true,
+  "filename": "snapmaker-u1-card.js",
+  "homeassistant": "2023.1.0",
+  "content_in_root": true
+}
