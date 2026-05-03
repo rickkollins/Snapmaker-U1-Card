@@ -7,6 +7,9 @@
 
 A **Prism Dashboard**-style Home Assistant Lovelace card for the **Snapmaker U1 3D printer**, pulling live data from the [Moonraker](https://moonraker.readthedocs.io/) REST API (Klipper / AFC Lite v2.x firmware).
 
+<p align="center">
+  <img src="docs/images/Screenshot-1.png" alt="HA Card Screenshot" width="340" />
+</p>
 ---
 
 ## Status Variants
