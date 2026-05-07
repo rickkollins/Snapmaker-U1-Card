@@ -1,15 +1,16 @@
 # Snapmaker U1 Card for Home Assistant
 
-[![Version](https://img.shields.io/badge/version-0.0.50-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.0.51-blue.svg)](CHANGELOG.md)
 [![HACS](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/hacs/integration)
 [![HA](https://img.shields.io/badge/Home%20Assistant-2023.1%2B-brightgreen.svg)](https://www.home-assistant.io/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
-A **Prism Dashboard**-style Home Assistant Lovelace card for the **Snapmaker U1 3D printer**, pulling live data from the [Moonraker](https://moonraker.readthedocs.io/) REST API (Klipper / AFC Lite v2.x firmware). THIS CARD REQUIRES THAT EXTENDED FIRMWARE BE INSTALLED, AND AFC LITE BE ENABLED! 
+A **Prism Dashboard**-style Home Assistant Lovelace card for the **Snapmaker U1 3D printer**, pulling live data from the [Moonraker](https://moonraker.readthedocs.io/) REST API (Klipper / AFC Lite v2.x firmware).
 
 <p align="center">
-  <img src="docs/images/Screenshot-1.png" alt="HA Card Screenshot" width="340" />
+  <img src="docs/images/snapmaker-u1.png" alt="Snapmaker U1" width="340" />
 </p>
+
 ---
 
 ## Status Variants
@@ -23,7 +24,37 @@ The card automatically switches appearance based on printer state.
 | ⏸️ **Paused** | Amber `#f59e0b` | Print paused — Resume / Cancel actions highlighted |
 | ❌ **Error / Offline** | Red `#ff4f4f` | Moonraker unreachable or firmware error |
 
+### Printing
 
+<p align="center">
+  <img src="docs/images/state-printing.jpg" alt="Printing state — cyan accent, progress bar, layer, speed, G-code thumbnail, AFC active lane glow" width="420" />
+</p>
+
+### Standby
+
+<p align="center">
+  <img src="docs/images/state-standby.jpg" alt="Standby state — purple accent, idle overlay, last print summary, Start Print and Preheat buttons" width="420" />
+</p>
+
+### Paused
+
+<p align="center">
+  <img src="docs/images/state-paused.jpg" alt="Paused state — amber accent, temperatures held, Resume / Cancel / E-Stop actions" width="420" />
+</p>
+
+### Error / Offline
+
+<p align="center">
+  <img src="docs/images/state-error.jpg" alt="Error state — red accent, fault code, halted progress bar, Clear Error action" width="420" />
+</p>
+
+### Live AFC Filament Panel
+
+The card embeds a 4-lane AFC filament strip. The active lane glows with its spool color; idle lanes are dimmed.
+
+<p align="center">
+  <img src="docs/images/afc-panel.png" alt="AFC Filament Panel" width="700" />
+</p>
 
 ---
 
@@ -69,6 +100,10 @@ moonraker_url: http://192.168.1.xxx    # required — Moonraker IP/hostname (no 
 printer_image: /local/snapmaker-u1.png # optional — image shown in card centre
 poll_interval: 2000                    # optional — polling ms (default 2000)
 # api_key: your-moonraker-api-key      # optional — only if Moonraker requires auth
+# printer_name: U1                     # optional — name shown in card header (default: U1)
+# printer_brand: snapmaker             # optional — brand text above the name
+# border_color: auto                   # optional — auto | rainbow | any CSS color
+# separator_color: auto                # optional — auto | rainbow | state | any CSS color
 ```
 
 ### Options
@@ -79,6 +114,10 @@ poll_interval: 2000                    # optional — polling ms (default 2000)
 | `printer_image` | No | *(none)* | URL or HA `/local/` path for the centre printer image |
 | `poll_interval` | No | `2000` | Polling interval in milliseconds |
 | `api_key` | No | *(none)* | Moonraker API key (omit if not required) |
+| `printer_name` | No | `U1` | Name displayed large in the card header |
+| `printer_brand` | No | `snapmaker` | Small brand text above the printer name |
+| `border_color` | No | `auto` | Card border color — `auto` (calm blue), `rainbow` (animated prismatic), or any CSS color (`#ff00cc`, `coral`) |
+| `separator_color` | No | `auto` | Divider line color — `auto`, `rainbow`, `state` (follows print state), or any CSS color |
 
 ### Printer image
 
@@ -148,7 +187,7 @@ cors_domains:
 
 See [CHANGELOG.md](CHANGELOG.md) for the full version history.
 
-**Current version:** `0.0.50` (internal build `v24.0.0`)
+**Current version:** `0.0.51` (internal build `v25.0.0`)
 
 ---
 

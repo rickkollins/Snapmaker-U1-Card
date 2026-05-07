@@ -417,6 +417,7 @@ class SnapmakerU1Card extends HTMLElement {
       moonraker_url: 'http://192.168.1.xxx',
       printer_image: '/local/snapmaker-u1.png',
       poll_interval: 2000,
+      printer_name:  'U1',
     };
   }
 
@@ -898,13 +899,15 @@ class SnapmakerU1Card extends HTMLElement {
   // ── Shared sub-templates ───────────────────────────────────────────────────
   _headerHTML(labelClass = '', iconClass = '') {
     const label = this._getStatusLabel();
+    const brand = this._config.printer_brand || 'snapmaker';
+    const name  = this._config.printer_name  || 'U1';
     return `
       <div class="card-header">
         <div class="header-left">
           <div class="printer-icon-sm ${iconClass}">${ICONS.printer}</div>
           <div>
-            <div class="hdr-brand">snapmaker</div>
-            <div class="hdr-model">U1</div>
+            <div class="hdr-brand">${brand}</div>
+            <div class="hdr-model">${name}</div>
           </div>
         </div>
         <div class="status-badge">
@@ -916,6 +919,78 @@ class SnapmakerU1Card extends HTMLElement {
 
   _prismLine(cls = '') {
     return `<div class="prism-line ${cls}"></div>`;
+  }
+
+  // ── Custom appearance styles (border_color / separator_color) ──────────────
+  _customStyles() {
+    const cfg = this._config;
+    let css = '';
+
+    // ── Border color ──────────────────────────────────────────────────────────
+    const bc = (cfg.border_color || 'auto').toLowerCase().trim();
+    if (bc === 'rainbow') {
+      css += `
+        .card-glow-border {
+          background: linear-gradient(135deg,
+            rgba(123,97,255,0.85) 0%, rgba(0,229,255,0.65) 20%,
+            rgba(191,90,242,0.80) 40%, rgba(255,100,120,0.65) 60%,
+            rgba(0,229,255,0.60) 80%, rgba(123,97,255,0.85) 100%);
+          background-size: 300% 300%;
+          animation: su1-rainbow-border 5s linear infinite;
+        }
+        @keyframes su1-rainbow-border {
+          0%   { background-position: 0% 50%; }
+          50%  { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
+        }`;
+    } else if (bc !== 'auto') {
+      // Treat as CSS color (hex, rgb, named)
+      css += `
+        .card-glow-border {
+          background: linear-gradient(135deg, ${bc}dd 0%, ${bc}88 40%, ${bc}bb 70%, ${bc}dd 100%);
+          animation: border-shift 8s ease-in-out infinite;
+        }`;
+    }
+
+    // ── Separator line color ──────────────────────────────────────────────────
+    const sc = (cfg.separator_color || 'auto').toLowerCase().trim();
+    if (sc === 'rainbow') {
+      css += `
+        .prism-line:not(.err-line):not(.pause-line) {
+          background: linear-gradient(90deg,
+            transparent 0%, #7b61ff 12%, #00e5ff 32%,
+            #bf5af2 52%, #ff6b8a 68%, #fbbf24 82%, #7b61ff 92%, transparent 100%);
+          background-size: 200% 100%;
+          animation: su1-rainbow-sep 4s linear infinite;
+          box-shadow: 0 0 10px rgba(0,229,255,0.5);
+          margin-top: -10px;
+        }
+        @keyframes su1-rainbow-sep {
+          0%   { background-position: 0% 0; }
+          100% { background-position: 200% 0; }
+        }`;
+    } else if (sc === 'state') {
+      css += `
+        .prism-line:not(.err-line):not(.pause-line) {
+          background: linear-gradient(90deg,
+            transparent 0%, var(--status-color) 15%,
+            var(--status-color) 65%, transparent 100%);
+          box-shadow: 0 0 10px var(--status-color);
+          animation: none;
+          margin-top: -10px;
+        }`;
+    } else if (sc !== 'auto') {
+      css += `
+        .prism-line:not(.err-line):not(.pause-line) {
+          background: linear-gradient(90deg,
+            transparent 0%, ${sc}ee 15%, ${sc} 50%, ${sc}ee 85%, transparent 100%);
+          box-shadow: 0 0 10px ${sc}88;
+          animation: none;
+          margin-top: -10px;
+        }`;
+    }
+
+    return css;
   }
 
   _leftTempCol(opts = {}) {
@@ -1272,11 +1347,13 @@ class SnapmakerU1Card extends HTMLElement {
   }
 
   _renderOffline() {
+    const brand = this._config.printer_brand || 'snapmaker';
+    const name  = this._config.printer_name  || 'U1';
     return `
       <div class="card-header">
         <div class="header-left">
           <div class="printer-icon-sm">${ICONS.printer}</div>
-          <div><div class="hdr-brand">snapmaker</div><div class="hdr-model">U1</div></div>
+          <div><div class="hdr-brand">${brand}</div><div class="hdr-model">${name}</div></div>
         </div>
         <div class="status-badge"><span class="status-pulse"></span>OFFLINE</div>
       </div>
@@ -1315,8 +1392,10 @@ class SnapmakerU1Card extends HTMLElement {
       else if (state === 'paused')   body = this._renderPaused();
       else if (state === 'error')    body = this._renderError();
       else                           body = this._renderStandby();
+      const customCss = this._customStyles();
       this.shadowRoot.innerHTML = `
         <style>${STYLES}</style>
+        ${customCss ? `<style>${customCss}</style>` : ''}
         <div class="ha-card" style="--status-color:${color};--status-glow:${glow}">
           <div class="card-glow-border"></div>
           ${body}
@@ -1481,6 +1560,54 @@ class SnapmakerU1CardEditor extends HTMLElement {
       <style>${EDITOR_STYLES}</style>
       <div class="sm-editor">
 
+        <div class="sm-section">Printer Identity</div>
+
+        <div class="sm-row">
+          <div class="sm-field">
+            <label>Brand</label>
+            <input type="text" name="printer_brand"
+              value="${this._v('printer_brand')}"
+              placeholder="snapmaker" />
+            <span class="sm-hint">Small text above the model name — e.g. <code>snapmaker</code></span>
+          </div>
+          <div class="sm-field">
+            <label>Printer Name</label>
+            <input type="text" name="printer_name"
+              value="${this._v('printer_name')}"
+              placeholder="U1" />
+            <span class="sm-hint">Large name shown in the card header — e.g. <code>U1</code>, <code>Artisan</code></span>
+          </div>
+        </div>
+
+        <hr class="sm-divider" />
+        <div class="sm-section">Appearance</div>
+
+        <div class="sm-field">
+          <label>Border Color</label>
+          <input type="text" name="border_color"
+            value="${this._v('border_color')}"
+            placeholder="auto" />
+          <span class="sm-hint">
+            <code>auto</code> — calm blue (default) &nbsp;·&nbsp;
+            <code>rainbow</code> — animated prismatic &nbsp;·&nbsp;
+            any CSS color: <code>#ff00cc</code>, <code>coral</code>, <code>rgb(0,200,100)</code>
+          </span>
+        </div>
+
+        <div class="sm-field">
+          <label>Separator Line Color</label>
+          <input type="text" name="separator_color"
+            value="${this._v('separator_color')}"
+            placeholder="auto" />
+          <span class="sm-hint">
+            <code>auto</code> — calm blue (default) &nbsp;·&nbsp;
+            <code>rainbow</code> — animated prismatic &nbsp;·&nbsp;
+            <code>state</code> — follows print state (cyan / amber / red) &nbsp;·&nbsp;
+            any CSS color: <code>#bf5af2</code>, <code>hotpink</code>
+          </span>
+        </div>
+
+        <hr class="sm-divider" />
         <div class="sm-section">Connection</div>
 
         <div class="sm-field">

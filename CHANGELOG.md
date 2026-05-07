@@ -5,7 +5,19 @@ Internal build numbers map to the semantic release version shown below.
 
 ---
 
-## [0.0.50] — 2026-05-03 *(current)*
+## [0.0.51] — 2026-05-07 *(current)*
+
+**Internal build:** `v25.0.0`
+
+### Added
+- **Configurable printer name** — `printer_name` and `printer_brand` YAML keys let you set any name in the card header (e.g. `printer_name: Artisan`). Default: `U1` / `snapmaker`.
+- **Border color** — new `border_color` key. Values: `auto` (calm blue default), `rainbow` (animated prismatic gradient), or any CSS color (`#ff00cc`, `coral`, `rgb(0,200,100)`).
+- **Separator line color** — new `separator_color` key. Values: `auto` (calm blue default), `rainbow` (animated prismatic), `state` (follows print state — cyan / amber / red), or any CSS color.
+- All three new options appear in the visual card editor (Edit Card panel) under new **Printer Identity** and **Appearance** sections.
+
+---
+
+## [0.0.50] — 2026-05-03
 
 **Internal build:** `v24.0.0`
 
